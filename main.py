@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from xml.dom.minidom import Document
 import cgi
 import wsgiref.handlers
 
@@ -28,36 +27,27 @@ class Image(db.Model):
 
 class MainHandler(webapp.RequestHandler):
 	def get(self):
-		# Create the minidom document
-		doc = Document()
-		
+		self.response.headers['Content-Type'] = "text/xml; charset=utf-8"
+		self.response.out.write("""<?xml version="1.0" encoding="utf-8"?> """)
 		image = Image()
 		image.full = self.request.get('full')
 		image.thumb = self.request.get('thumb')
 		if image.full !='' and image.thumb != '':
 			image.put()
-		# Create the <img> base element
-		img = doc.createElement("img")
-		doc.appendChild(img)
-		
+
 		images = db.GqlQuery("SELECT * "
                              "FROM Image ")
 							
 		# Parse links to full and thumb
 		for allimage in images:
-			full = doc.createElement("full")
-			thumb = doc.createElement("thumb")
-			img.appendChild(full)
-			img.appendChild(thumb)
-			fulllink = doc.createTextNode(cgi.escape(allimage.full))
-			full.appendChild(fulllink)
-			thumblink = doc.createTextNode(cgi.escape(allimage.thumb))
-			thumb.appendChild(thumblink)
-
-		# Print our newly created XML
-		print doc.toprettyxml(indent="  ")
-						  
-
+			self.response.out.write('<img>')
+			self.response.out.write('<full>%s</full>' % 
+									cgi.escape(allimage.full))
+			self.response.out.write('<thumb>%s</thumb>' %
+									cgi.escape(allimage.thumb))
+			self.response.out.write('</img>')
+			
+	
 application = webapp.WSGIApplication([
   ('/', MainHandler),
 ], debug=True)
