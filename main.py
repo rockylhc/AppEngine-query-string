@@ -15,10 +15,12 @@
 # limitations under the License.
 #
 import cgi
+import os
 import wsgiref.handlers
 
 from google.appengine.ext import db
 from google.appengine.ext import webapp
+from google.appengine.ext.webapp import template
 from google.appengine.ext.webapp import util
 
 class Image(db.Model):
@@ -27,8 +29,8 @@ class Image(db.Model):
 
 class MainHandler(webapp.RequestHandler):
 	def get(self):
-		self.response.headers['Content-Type'] = "text/xml; charset=utf-8"
-		self.response.out.write("""<?xml version="1.0" encoding="utf-8"?> """)
+		self.response.headers['Content-Type'] = 'text/xml'
+		self.response.out.write("""<?xml version="1.0"?>""")
 		image = Image()
 		image.full = self.request.get('full')
 		image.thumb = self.request.get('thumb')
